@@ -1,10 +1,9 @@
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
-import dotenv from "dotenv";
 import Fastify from "fastify";
+import { config, logConfig } from "./config/env";
 import { authRoutes } from "./routes/auth";
-import { config, logConfig } from "./services/env";
 import { closeDatabaseConnection, connectToDatabase } from "./utils/mongodb";
 
 const fastify = Fastify({
