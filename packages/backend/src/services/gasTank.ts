@@ -5,36 +5,9 @@ import {
   parseEther,
   formatEther,
   Hex,
-  defineChain,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-
-// Define Monad testnet chain configuration
-const monadTestnet = defineChain({
-  id: 41470,
-  name: "Monad Testnet",
-  network: "monad-testnet",
-  nativeCurrency: {
-    decimals: 18,
-    name: "Monad",
-    symbol: "MON",
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://testnet-rpc.monad.xyz"],
-    },
-    public: {
-      http: ["https://testnet-rpc.monad.xyz"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Monad Testnet Explorer",
-      url: "https://testnet-explorer.monad.xyz",
-    },
-  },
-  testnet: true,
-});
+import { monadTestnet } from "../config/chains";
 
 export interface GasTankConfig {
   privateKey: string;

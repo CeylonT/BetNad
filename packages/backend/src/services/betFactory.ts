@@ -7,31 +7,8 @@ import {
   encodeFunctionData,
   Hex,
 } from "viem";
-import { defineChain } from "viem";
 import { config } from "../config/env";
-
-// Define Monad testnet chain
-export const monadTestnet = defineChain({
-  id: 41454,
-  name: 'Monad Testnet',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'MON',
-    symbol: 'MON',
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://testnet-rpc.monad.xyz'],
-    },
-    public: {
-      http: ['https://testnet-rpc.monad.xyz'],
-    },
-  },
-  blockExplorers: {
-    default: { name: 'Monad Explorer', url: 'https://testnet-explorer.monad.xyz' },
-  },
-  testnet: true,
-});
+import { monadTestnet } from "../config/chains";
 
 export interface BetFactoryConfig {
   privyAppId: string;

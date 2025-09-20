@@ -7,7 +7,7 @@ import {
   encodeFunctionData,
   Hex,
 } from "viem";
-import { monadTestnet } from "./betFactory";
+import { monadTestnet } from "../config/chains";
 import { config } from "../config/env";
 
 export interface BetMarketConfig {

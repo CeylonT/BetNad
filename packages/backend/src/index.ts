@@ -9,6 +9,7 @@ import { authRoutes } from "./routes/auth";
 import { betFactoryRoutes } from "./routes/betFactory";
 import { pollRoutes } from "./routes/polls";
 import { twitterOAuthRoutes } from "./routes/twitterOAuth";
+import { walletRoutes } from "./routes/wallet";
 import { betFactoryService } from "./services/betFactory";
 import { privyClient } from "./services/privy";
 import { closeDatabaseConnection, connectToDatabase } from "./utils/mongodb";
@@ -71,6 +72,7 @@ async function registerRoutes() {
   await fastify.register(twitterOAuthRoutes, { prefix: "/api" });
   await fastify.register(betFactoryRoutes, { prefix: "/api/betting" });
   await fastify.register(pollRoutes, { prefix: "/api" });
+  await fastify.register(walletRoutes, { prefix: "/api/wallet" });
 }
 
 // Graceful shutdown
