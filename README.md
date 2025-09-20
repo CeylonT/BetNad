@@ -1,13 +1,13 @@
-# 🎯 NadBet - Revolutionary Prediction Market Platform
+# 🎯 BetNad - Revolutionary Prediction Market Platform
 
 <div align="center">
   <h3>Gamified Betting Meets Social Media</h3>
   <p>Experience prediction markets like never before with Tinder-style swiping and Twitter bot integration</p>
 </div>
 
-## 🚀 What is NadBet?
+## 🚀 What is BetNad?
 
-NadBet is a next-generation prediction market platform that revolutionizes how users interact with betting through innovative, fun mechanics. We're bringing the excitement of prediction markets to the masses with intuitive interfaces and social media integration.
+BetNad is a next-generation prediction market platform that revolutionizes how users interact with betting through innovative, fun mechanics. We're bringing the excitement of prediction markets to the masses with intuitive interfaces and social media integration.
 
 ## ✨ Key Features
 
@@ -128,7 +128,7 @@ packages/
 - User wallet integration
 - Social sharing features
 
-## 🌟 Why NadBet?
+## 🌟 Why BetNad?
 
 - **User-Friendly**: Intuitive interface that anyone can use
 - **Social Integration**: Leverage Twitter for marketing and engagement
@@ -148,5 +148,5 @@ This project is licensed under the MIT License.
 
 <div align="center">
   <p><strong>Ready to revolutionize prediction markets?</strong></p>
-  <p>Start building with NadBet today! 🚀</p>
+  <p>Start building with BetNad today! 🚀</p>
 </div>
