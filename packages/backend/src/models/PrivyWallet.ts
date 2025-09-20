@@ -1,5 +1,7 @@
 import { getDatabase } from "../utils/mongodb";
 import { IPrivyWallet } from "../types";
+import { createGasTankService } from "../services/gasTank";
+import env from "../config/env";
 
 export class PrivyWallet {
   private static collection = "privy_wallets";
@@ -31,10 +33,41 @@ export class PrivyWallet {
       throw new Error("Failed to create wallet");
     }
 
-    return {
+    const createdWallet = {
       ...newWallet,
       _id: result.insertedId.toString(),
     };
+
+    // Call supportGas only for first-time wallet creation
+    try {
+      const gasTankService = createGasTankService({
+        privateKey: env.gasTank.privateKey,
+        gasAmount: env.gasTank.amount,
+        rpcUrl: env.gasTank.rpcUrl,
+      });
+
+      const gasSupportResult = await gasTankService.supportGas(
+        walletData.address
+      );
+
+      if (gasSupportResult.success) {
+        console.log(
+          `Gas support sent to new wallet ${walletData.address}: ${gasSupportResult.amount} MON`
+        );
+      } else {
+        console.log(
+          `Gas support not sent to wallet ${walletData.address}: ${gasSupportResult.message}`
+        );
+      }
+    } catch (error) {
+      console.error(
+        `Failed to send gas support to wallet ${walletData.address}:`,
+        error
+      );
+      // Don't throw error here as wallet creation should succeed even if gas support fails
+    }
+
+    return createdWallet;
   }
 
   static async save(
