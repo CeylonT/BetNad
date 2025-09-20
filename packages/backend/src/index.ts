@@ -5,11 +5,11 @@ import Fastify from "fastify";
 import { config, logConfig } from "./config/env";
 import { authRoutes } from "./routes/auth";
 import { closeDatabaseConnection, connectToDatabase } from "./utils/mongodb";
+import { privyClient } from "./services/privy";
 
 const fastify = Fastify({
   logger: {
     level: config.logLevel,
-    prettyPrint: config.isDevelopment,
   },
 });
 
