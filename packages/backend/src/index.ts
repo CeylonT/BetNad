@@ -7,7 +7,9 @@ import Fastify from "fastify";
 import { config, logConfig } from "./config/env";
 import { authRoutes } from "./routes/auth";
 import { twitterOAuthRoutes } from "./routes/twitterOAuth";
+import { betFactoryRoutes } from "./routes/betFactory";
 import { privyClient } from "./services/privy";
+import { betFactoryService } from "./services/betFactory";
 import { closeDatabaseConnection, connectToDatabase } from "./utils/mongodb";
 
 const fastify = Fastify({
@@ -66,6 +68,7 @@ async function registerRoutes() {
   // API routes
   await fastify.register(authRoutes, { prefix: "/api/auth" });
   await fastify.register(twitterOAuthRoutes, { prefix: "/api" });
+  await fastify.register(betFactoryRoutes, { prefix: "/api/betting" });
 }
 
 // Graceful shutdown
@@ -98,8 +101,9 @@ async function start() {
     // Initialize Twitter service
     console.log("🐦 Twitter service initialized");
 
-    // Make Privy client available globally
+    // Make Privy client and BetFactory service available globally
     fastify.decorate("privy", privyClient);
+    fastify.decorate("betFactory", betFactoryService);
 
     // Register plugins and routes
     await registerPlugins();
