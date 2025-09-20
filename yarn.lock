@@ -190,11 +190,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@betnad/backend@workspace:packages/backend"
   dependencies:
+    "@fastify/cookie": ^9.1.1
     "@fastify/cors": ^8.4.0
     "@fastify/helmet": ^11.1.1
     "@fastify/rate-limit": ^8.0.3
+    "@fastify/session": ^10.7.0
     "@privy-io/server-auth": ^1.0.0
-    "@types/node": ^20.10.0
+    "@types/node": ^24.5.2
     "@typescript-eslint/eslint-plugin": ^6.13.0
     "@typescript-eslint/parser": ^6.13.0
     dotenv: ^16.3.1
@@ -204,6 +206,7 @@ __metadata:
     tsx: ^4.6.0
     twitter-api-v2: ^1.15.0
     typescript: ^5.3.0
+    viem: ^2.0.0
     zod: ^3.22.4
   languageName: unknown
   linkType: soft
@@ -1498,6 +1501,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fastify/cookie@npm:^9.1.1":
+  version: 9.4.0
+  resolution: "@fastify/cookie@npm:9.4.0"
+  dependencies:
+    cookie-signature: ^1.1.0
+    fastify-plugin: ^4.0.0
+  checksum: cea22a03cc005468fc217da9d8e22b239e11ef7fea5f51189fa21ad0781baa430d9798eb72d51b74781be512b6b9e60bb2fc174c3e451e91584714cfb44fdfbf
+  languageName: node
+  linkType: hard
+
 "@fastify/cors@npm:^8.4.0":
   version: 8.5.0
   resolution: "@fastify/cors@npm:8.5.0"
@@ -1551,6 +1564,16 @@ __metadata:
     ms: ^2.1.3
     tiny-lru: ^11.0.0
   checksum: 83a690e1c445fb3330dd99e539e3aab23de383d8d8859af078e543940a46b10aeb5d4977e16f5d03236079bebfc3aae678b05d4d09be8f440275bc0cd615fff8
+  languageName: node
+  linkType: hard
+
+"@fastify/session@npm:^10.7.0":
+  version: 10.9.0
+  resolution: "@fastify/session@npm:10.9.0"
+  dependencies:
+    fastify-plugin: ^4.0.0
+    safe-stable-stringify: ^2.3.1
+  checksum: 838bbaf1a4e22a0158a112981d7a540cb85f6de964e09183904eabe4db8c6650afba3cc3c3d13e47afbd1c9b96e742c4c3a6e0091193bc06053b9a8db33d7cf8
   languageName: node
   linkType: hard
 
@@ -4689,15 +4712,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.10.0":
-  version: 20.19.17
-  resolution: "@types/node@npm:20.19.17"
-  dependencies:
-    undici-types: ~6.21.0
-  checksum: facdb62f39dc01fda2822cda491bd6826dd10e5d9ab83d482e0b032a8fc28ad7e70345b20f6f0f284c9fdf8873d83c7be5ce55e19425cd973beb84f2f7fb0862
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:^20.10.7":
   version: 20.19.1
   resolution: "@types/node@npm:20.19.1"
@@ -4713,6 +4727,15 @@ __metadata:
   dependencies:
     undici-types: ~6.21.0
   checksum: c200df1bc9abcfe79d4002f65cb96582dcd45ea10201e3bf070590a521ba50db0c3412e73aef425db7f395490f14f999e7cd5fbc1c3620a57d3d21ad67482c4d
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^24.5.2":
+  version: 24.5.2
+  resolution: "@types/node@npm:24.5.2"
+  dependencies:
+    undici-types: ~7.12.0
+  checksum: 5d859c117a3e15e2e7cca429ba2db9b7c5ef167eb6386ab3db9f9aad7f705baee45957ad11d6c3d7514dc189ee9ec311905944dfbe9823497ad80a9f15add048
   languageName: node
   linkType: hard
 
@@ -7895,6 +7918,13 @@ __metadata:
   version: 1.2.2
   resolution: "cookie-es@npm:1.2.2"
   checksum: 099050c30c967c89aa72d1d7984e87b3395f3e709cf148d297f436828ebfcc39033f5374d2efdc46d9b5e3eee50b1d59635432c252e57329fea7f09afeb4d055
+  languageName: node
+  linkType: hard
+
+"cookie-signature@npm:^1.1.0":
+  version: 1.2.2
+  resolution: "cookie-signature@npm:1.2.2"
+  checksum: 1ad4f9b3907c9f3673a0f0a07c0a23da7909ac6c9204c5d80a0ec102fe50ccc45f27fdf496361840d6c132c5bb0037122c0a381f856d070183d1ebe3e5e041ff
   languageName: node
   linkType: hard
 
@@ -14719,6 +14749,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ox@npm:0.9.6":
+  version: 0.9.6
+  resolution: "ox@npm:0.9.6"
+  dependencies:
+    "@adraffy/ens-normalize": ^1.11.0
+    "@noble/ciphers": ^1.3.0
+    "@noble/curves": 1.9.1
+    "@noble/hashes": ^1.8.0
+    "@scure/bip32": ^1.7.0
+    "@scure/bip39": ^1.6.0
+    abitype: ^1.0.9
+    eventemitter3: 5.0.1
+  peerDependencies:
+    typescript: ">=5.4.0"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 5f5094502cab9b135f3de3dfe60691fc312a1e534b3a9ef03bd867bfe0921245360c78dcb59bb438f6d66316b7da29506da4b46633f48cd8f7c4f37f56a76e4c
+  languageName: node
+  linkType: hard
+
 "p-cancelable@npm:^4.0.1":
   version: 4.0.1
   resolution: "p-cancelable@npm:4.0.1"
@@ -18192,6 +18243,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici-types@npm:~7.12.0":
+  version: 7.12.0
+  resolution: "undici-types@npm:7.12.0"
+  checksum: 4ad2770b92835757eee6416e8518972d83fc77286c11af81d368a55578d9e4f7ab1b8a3b13c304b0e25a400583e66f3c58464a051f8b5c801ab5d092da13903e
+  languageName: node
+  linkType: hard
+
 "undici-types@npm:~7.8.0":
   version: 7.8.0
   resolution: "undici-types@npm:7.8.0"
@@ -18722,6 +18780,27 @@ __metadata:
     typescript:
       optional: true
   checksum: 2a8b0ebf6eb09029acc4ca0aac3986c467b03b29c41afe0d3a24b3e0ec1ef38a1d1479f821051e00df8d93d230b8eecb527f033f23007a0157637cb37d336168
+  languageName: node
+  linkType: hard
+
+"viem@npm:^2.0.0":
+  version: 2.37.7
+  resolution: "viem@npm:2.37.7"
+  dependencies:
+    "@noble/curves": 1.9.1
+    "@noble/hashes": 1.8.0
+    "@scure/bip32": 1.7.0
+    "@scure/bip39": 1.6.0
+    abitype: 1.1.0
+    isows: 1.0.7
+    ox: 0.9.6
+    ws: 8.18.3
+  peerDependencies:
+    typescript: ">=5.0.4"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 2691f2e5d98f5c67d4b382b700aad60b14381c8f7acfb3a6a268bcbf7869987bf23247fd1f9e1feb64864b9c7ae036ec1c7f8fc084aca5d0ad1f94d4e1f92f62
   languageName: node
   linkType: hard
 
