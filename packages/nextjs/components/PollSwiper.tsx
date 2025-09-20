@@ -294,16 +294,55 @@ export const PollSwiper: React.FC<PollSwiperProps> = ({ selectedCategory, refres
     setCurrentIndex(0);
   }, [selectedCategory]);
 
-  const handleSwipe = (direction: 'left' | 'right' | 'skip') => {
+  const handleSwipe = async (direction: 'left' | 'right' | 'skip') => {
     const currentPoll = filteredPolls[currentIndex];
 
     console.log(`${direction.toUpperCase()} on poll:`, currentPoll.description);
 
+    // Handle swipe-to-bet for left (No) and right (Yes)
+    if ((direction === 'left' || direction === 'right') && user && currentPoll.marketAddress) {
+      const betOnYes = direction === 'right';
+
+      try {
+        // Check if user already bet on this poll
+        if (currentPoll.userBets?.hasVoted) {
+          alert(`You've already bet ${currentPoll.userBets.betOnYes ? 'YES' : 'NO'} on this poll!`);
+          setCurrentIndex(prev => prev + 1);
+          return;
+        }
+
+        // Place bet via API
+        const response = await fetch(`/api/betting/poll/${currentPoll._id}/bet`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            betOnYes,
+            userId: user.uid,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Show success message
+          const betDirection = betOnYes ? 'YES' : 'NO';
+          alert(`🎉 Bet placed successfully!\n\n💰 ${betDirection} bet on "${currentPoll.description}"\n🔗 TX: ${result.txHash?.substring(0, 10)}...`);
+
+          // Refresh polls to update betting data
+          fetchPolls();
+        } else {
+          alert(`❌ Bet failed: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Swipe bet error:', error);
+        alert(`❌ Error placing bet: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+
     // Move to next poll
     setCurrentIndex(prev => prev + 1);
-
-    // For traditional voting (free predictions), could potentially be sent to API
-    // This is different from betting which goes through the BettingInterface
   };
 
   const handleBetPlaced = (result: BettingResult) => {
