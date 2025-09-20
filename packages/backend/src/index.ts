@@ -1,19 +1,16 @@
-import Fastify from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import dotenv from "dotenv";
-import { connectToDatabase, closeDatabaseConnection } from "./utils/mongodb";
-import { initializeFirebase, privyClient } from "./services/firebase";
+import Fastify from "fastify";
 import { authRoutes } from "./routes/auth";
-
-// Load environment variables
-dotenv.config();
+import { config, logConfig } from "./services/env";
+import { closeDatabaseConnection, connectToDatabase } from "./utils/mongodb";
 
 const fastify = Fastify({
   logger: {
-    level: process.env.NODE_ENV === "production" ? "info" : "debug",
-    prettyPrint: process.env.NODE_ENV === "development",
+    level: config.logLevel,
+    prettyPrint: config.isDevelopment,
   },
 });
 
@@ -21,7 +18,7 @@ const fastify = Fastify({
 async function registerPlugins() {
   // CORS
   await fastify.register(cors, {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: config.cors.origin,
     credentials: true,
   });
 
@@ -77,8 +74,11 @@ async function start() {
     // Connect to MongoDB
     await connectToDatabase();
 
-    // Initialize Firebase
-    initializeFirebase();
+    // Log configuration
+    logConfig();
+
+    // Initialize Twitter service
+    console.log("🐦 Twitter service initialized");
 
     // Make Privy client available globally
     fastify.decorate("privy", privyClient);
@@ -88,7 +88,7 @@ async function start() {
     await registerRoutes();
 
     // Start server
-    const port = parseInt(process.env.PORT || "3001");
+    const port = config.port;
     const host = process.env.HOST || "0.0.0.0";
 
     await fastify.listen({ port, host });

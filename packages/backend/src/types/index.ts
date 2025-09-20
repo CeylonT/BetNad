@@ -14,7 +14,8 @@ export interface AuthRequest {
 }
 
 export interface LoginRequest {
-  idToken: string;
+  accessToken: string;
+  accessSecret: string;
 }
 
 export interface LoginResponse {
@@ -24,7 +25,8 @@ export interface LoginResponse {
 }
 
 export interface VerifyTokenRequest {
-  idToken: string;
+  accessToken: string;
+  accessSecret: string;
 }
 
 export interface VerifyTokenResponse {

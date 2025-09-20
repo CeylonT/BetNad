@@ -1,21 +1,23 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
-import { verifyIdToken, mapFirebaseUserToUser } from "../services/firebase";
 import { UserModel } from "../models/User";
+import { twitterService } from "../services/twitter";
 import {
+  ErrorResponse,
   LoginRequest,
   LoginResponse,
   VerifyTokenRequest,
   VerifyTokenResponse,
-  ErrorResponse,
 } from "../types";
 
 const loginSchema = z.object({
-  idToken: z.string().min(1, "ID token is required"),
+  accessToken: z.string().min(1, "Access token is required"),
+  accessSecret: z.string().min(1, "Access secret is required"),
 });
 
 const verifyTokenSchema = z.object({
-  idToken: z.string().min(1, "ID token is required"),
+  accessToken: z.string().min(1, "Access token is required"),
+  accessSecret: z.string().min(1, "Access secret is required"),
 });
 
 export async function authRoutes(fastify: FastifyInstance) {
@@ -64,16 +66,24 @@ export async function authRoutes(fastify: FastifyInstance) {
       reply: FastifyReply
     ) => {
       try {
-        const { idToken } = request.body;
+        const { accessToken, accessSecret } = request.body;
 
-        // Verify Firebase ID token
-        const decodedToken = await verifyIdToken(idToken);
+        // Verify Twitter credentials
+        const twitterUser = await twitterService.verifyUserAuth(
+          accessToken,
+          accessSecret
+        );
 
-        // Get user details from Firebase
-        const firebaseUser = await fastify.firebase
-          .auth()
-          .getUser(decodedToken.uid);
-        const userData = mapFirebaseUserToUser(firebaseUser);
+        // Map Twitter user to our User model
+        const userData = {
+          uid: twitterUser.id,
+          email: twitterUser.email || "",
+          displayName: twitterUser.name || twitterUser.username,
+          photoURL: twitterUser.profile_image_url || undefined,
+          walletAddress: "", // Will be set later when user connects wallet
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
 
         // Create or update user in MongoDB
         const user = await UserModel.createOrUpdate(userData);
@@ -143,13 +153,16 @@ export async function authRoutes(fastify: FastifyInstance) {
       reply: FastifyReply
     ) => {
       try {
-        const { idToken } = request.body;
+        const { accessToken, accessSecret } = request.body;
 
-        // Verify Firebase ID token
-        const decodedToken = await verifyIdToken(idToken);
+        // Verify Twitter credentials
+        const twitterUser = await twitterService.verifyUserAuth(
+          accessToken,
+          accessSecret
+        );
 
         // Get user from MongoDB
-        const user = await UserModel.findByUid(decodedToken.uid);
+        const user = await UserModel.findByUid(twitterUser.id);
 
         if (!user) {
           const response: VerifyTokenResponse = {
