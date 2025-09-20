@@ -35,6 +35,11 @@ const envSchema = z.object({
   // Privy configuration (optional)
   PRIVY_APP_ID: z.string().default(""),
   PRIVY_APP_SECRET: z.string().default(""),
+
+  // Gas Tank configuration (optional)
+  GAS_TANK_PRIVATE_KEY: z.string().default(""),
+  GAS_TANK_AMOUNT: z.string().default("0.001"),
+  GAS_TANK_RPC_URL: z.string().default("https://testnet-rpc.monad.xyz"),
 });
 
 // Validate and parse environment variables
@@ -170,6 +175,11 @@ export const config = {
     appId: env.PRIVY_APP_ID,
     appSecret: env.PRIVY_APP_SECRET,
   },
+  gasTank: {
+    privateKey: env.GAS_TANK_PRIVATE_KEY,
+    amount: env.GAS_TANK_AMOUNT,
+    rpcUrl: env.GAS_TANK_RPC_URL,
+  },
   isDevelopment,
   isProduction,
   isTest,
@@ -212,6 +222,8 @@ export function logConfig(): void {
     `  Mention Polling Interval: ${config.twitter.mentionPollingInterval}ms`
   );
   console.log(`  Max Mention Results: ${config.twitter.maxMentionResults}`);
+  console.log(`  Gas Tank Amount: ${config.gasTank.amount} MON`);
+  console.log(`  Gas Tank RPC URL: ${config.gasTank.rpcUrl}`);
 
   if (isDevelopment) {
     console.log("🔑 Twitter API Keys (masked):");
