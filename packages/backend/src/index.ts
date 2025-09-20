@@ -4,7 +4,7 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import dotenv from "dotenv";
 import { connectToDatabase, closeDatabaseConnection } from "./utils/mongodb";
-import { initializeFirebase } from "./services/firebase";
+import { initializeFirebase, privyClient } from "./services/firebase";
 import { authRoutes } from "./routes/auth";
 
 // Load environment variables
@@ -79,6 +79,9 @@ async function start() {
 
     // Initialize Firebase
     initializeFirebase();
+
+    // Make Privy client available globally
+    fastify.decorate("privy", privyClient);
 
     // Register plugins and routes
     await registerPlugins();
