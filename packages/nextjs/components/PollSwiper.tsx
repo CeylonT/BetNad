@@ -2,33 +2,22 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, PanInfo, useAnimation } from "framer-motion";
-
-// Poll data structure matching API response
-interface Poll {
-  _id: string;
-  description: string;
-  category: string;
-  verifierRule: string;
-  createdBy: string;
-  totalVotes: number;
-  yesVotes: number;
-  noVotes: number;
-  createdAt: string;
-  expiresAt?: string;
-  status: string;
-  twitterPostId?: string;
-  updatedAt: string;
-}
+import { Poll, BetDirection, BettingResult } from "~~/types/poll";
+import { BettingInterface } from "./BettingInterface";
+import { AuthGuard } from "./AuthGuard";
+import { useAuth } from "~~/hooks/useAuth";
 
 interface PollCardProps {
   poll: Poll;
   onSwipe: (direction: 'left' | 'right' | 'skip') => void;
+  onBetPlaced: (result: BettingResult) => void;
   isTop: boolean;
 }
 
-const PollCard: React.FC<PollCardProps> = ({ poll, onSwipe, isTop }) => {
+const PollCard: React.FC<PollCardProps> = ({ poll, onSwipe, onBetPlaced, isTop }) => {
   const controls = useAnimation();
   const constraintsRef = useRef(null);
+  const [showBetting, setShowBetting] = useState(false);
 
   const handleDragEnd = (event: any, info: PanInfo) => {
     const threshold = 150;
@@ -122,58 +111,96 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onSwipe, isTop }) => {
           <p className="text-sm text-base-content mt-1">{poll.verifierRule}</p>
         </div>
 
-        {/* Current Results */}
+        {/* Market Results */}
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-2 text-base-content">
-            <span>Current Results</span>
-            <span className="font-medium">{getYesPercentage()}% Yes</span>
+            <span>Market Results</span>
+            <span className="font-medium">
+              {poll.odds ? `${poll.odds.yesPercentage}% Yes` : `${getYesPercentage()}% Yes`}
+            </span>
           </div>
           <div className="w-full bg-base-300 rounded-full h-2">
             <div
               className="bg-success h-2 rounded-full transition-all duration-300"
-              style={{ width: `${getYesPercentage()}%` }}
+              style={{
+                width: `${poll.odds ? poll.odds.yesPercentage : getYesPercentage()}%`
+              }}
             />
           </div>
           <div className="flex justify-between text-xs text-base-content/70 mt-1">
-            <span>{poll.yesVotes} Yes</span>
-            <span>{poll.noVotes} No</span>
+            <span>
+              {poll.marketStats?.totalYesBets || poll.yesVotes} Yes
+              {poll.marketStats && ` (${poll.marketStats.totalYesBets} MON)`}
+            </span>
+            <span>
+              {poll.marketStats?.totalNoBets || poll.noVotes} No
+              {poll.marketStats && ` (${poll.marketStats.totalNoBets} MON)`}
+            </span>
           </div>
+          {poll.odds && (
+            <div className="flex justify-between text-xs text-info mt-1">
+              <span>No: {poll.odds.noOdds.toFixed(2)}x odds</span>
+              <span>Yes: {poll.odds.yesOdds.toFixed(2)}x odds</span>
+            </div>
+          )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3">
-          <button
-            onClick={() => onSwipe('left')}
-            className="flex-1 btn btn-error btn-outline gap-2"
-            disabled={!isTop}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            No
-          </button>
+        {/* Betting Interface */}
+        {showBetting ? (
+          <BettingInterface
+            poll={poll}
+            onBetPlaced={(result) => {
+              onBetPlaced(result);
+              setShowBetting(false);
+            }}
+            onBetCancel={() => setShowBetting(false)}
+          />
+        ) : (
+          <div className="space-y-3">
+            {/* Bet/Prediction Toggle */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowBetting(true)}
+                className="flex-1 btn btn-primary btn-sm"
+                disabled={!isTop}
+              >
+                💰 Place Bet
+              </button>
+              <button
+                onClick={() => onSwipe('skip')}
+                className="btn btn-sm btn-ghost"
+                disabled={!isTop}
+              >
+                Skip
+              </button>
+            </div>
 
-          <button
-            onClick={() => onSwipe('skip')}
-            className="btn btn-circle btn-ghost"
-            disabled={!isTop}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </button>
+            {/* Traditional Vote Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => onSwipe('left')}
+                className="flex-1 btn btn-error btn-outline gap-2"
+                disabled={!isTop}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Predict No
+              </button>
 
-          <button
-            onClick={() => onSwipe('right')}
-            className="flex-1 btn btn-success btn-outline gap-2"
-            disabled={!isTop}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            Yes
-          </button>
-        </div>
+              <button
+                onClick={() => onSwipe('right')}
+                className="flex-1 btn btn-success btn-outline gap-2"
+                disabled={!isTop}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Predict Yes
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Swipe Indicators */}
         {isTop && (
@@ -209,14 +236,22 @@ export const PollSwiper: React.FC<PollSwiperProps> = ({ selectedCategory, refres
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
-  // Fetch polls from API
+  // Fetch polls from API with market data
   const fetchPolls = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('/api/polls?limit=50'); // Fetch more polls for better experience
+      // Fetch polls with market data and user-specific betting info
+      const queryParams = new URLSearchParams({
+        limit: '50',
+        includeMarketData: 'true',
+        ...(user ? { userId: user.uid } : {})
+      });
+
+      const response = await fetch(`/api/polls?${queryParams}`);
       const data = await response.json();
 
       if (data.success) {
@@ -232,10 +267,10 @@ export const PollSwiper: React.FC<PollSwiperProps> = ({ selectedCategory, refres
     }
   };
 
-  // Load polls on component mount and when refreshTrigger changes
+  // Load polls on component mount and when user/refreshTrigger changes
   useEffect(() => {
     fetchPolls();
-  }, [refreshTrigger]);
+  }, [user, refreshTrigger]);
 
   // Filter polls based on selected category
   const filteredPolls = React.useMemo(() => {
@@ -267,10 +302,18 @@ export const PollSwiper: React.FC<PollSwiperProps> = ({ selectedCategory, refres
     // Move to next poll
     setCurrentIndex(prev => prev + 1);
 
-    // TODO: Send vote to API when implementing actual voting
-    // if (direction !== 'skip') {
-    //   sendVote(currentPoll.id, direction === 'right' ? 'yes' : 'no');
-    // }
+    // For traditional voting (free predictions), could potentially be sent to API
+    // This is different from betting which goes through the BettingInterface
+  };
+
+  const handleBetPlaced = (result: BettingResult) => {
+    console.log('Bet placed:', result);
+
+    // Refresh polls to update with new betting data
+    fetchPolls();
+
+    // Move to next poll after successful bet
+    setCurrentIndex(prev => prev + 1);
   };
 
   const resetPolls = () => {
@@ -346,26 +389,29 @@ export const PollSwiper: React.FC<PollSwiperProps> = ({ selectedCategory, refres
   }
 
   return (
-    <div className="relative w-full h-full max-w-md mx-auto p-4">
-      <div className="relative w-full h-[600px]">
-        {visiblePolls.map((poll, index) => (
-          <PollCard
-            key={poll._id}
-            poll={poll}
-            onSwipe={handleSwipe}
-            isTop={index === 0}
-          />
-        ))}
-      </div>
+    <AuthGuard requireWallet={true}>
+      <div className="relative w-full h-full max-w-md mx-auto p-4">
+        <div className="relative w-full h-[600px]">
+          {visiblePolls.map((poll, index) => (
+            <PollCard
+              key={poll._id}
+              poll={poll}
+              onSwipe={handleSwipe}
+              onBetPlaced={handleBetPlaced}
+              isTop={index === 0}
+            />
+          ))}
+        </div>
 
-      {/* Instructions */}
-      <div className="mt-4 text-center">
-        <p className="text-sm text-base-content/70">
-          Swipe left for <span className="text-error font-medium">No</span>,
-          right for <span className="text-success font-medium">Yes</span>,
-          or tap skip to pass
-        </p>
+        {/* Instructions */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-base-content/70">
+            💰 <span className="text-primary font-medium">Place bets</span> or make{" "}
+            <span className="text-success font-medium">Yes</span>/
+            <span className="text-error font-medium">No</span> predictions
+          </p>
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 };

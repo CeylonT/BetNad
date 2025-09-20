@@ -7,6 +7,7 @@ import Fastify from "fastify";
 import { config, logConfig } from "./config/env";
 import { authRoutes } from "./routes/auth";
 import { betFactoryRoutes } from "./routes/betFactory";
+import { pollBettingRoutes } from "./routes/pollBetting";
 import { pollRoutes } from "./routes/polls";
 import { twitterOAuthRoutes } from "./routes/twitterOAuth";
 import { walletRoutes } from "./routes/wallet";
@@ -71,6 +72,7 @@ async function registerRoutes() {
   await fastify.register(authRoutes, { prefix: "/api/auth" });
   await fastify.register(twitterOAuthRoutes, { prefix: "/api" });
   await fastify.register(betFactoryRoutes, { prefix: "/api/betting" });
+  await fastify.register(pollBettingRoutes, { prefix: "/api/betting" });
   await fastify.register(pollRoutes, { prefix: "/api" });
   await fastify.register(walletRoutes, { prefix: "/api/wallet" });
 }
