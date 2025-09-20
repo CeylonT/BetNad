@@ -1,0 +1,40 @@
+{
+    "name": "@betnad/backend",
+    "version": "1.0.0",
+    "description": "BetNad Backend API with Fastify and Firebase Auth",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "lint": "eslint src --ext .ts",
+        "lint:fix": "eslint src --ext .ts --fix"
+    },
+    "dependencies": {
+        "fastify": "^4.24.3",
+        "@fastify/cors": "^8.4.0",
+        "@fastify/helmet": "^11.1.1",
+        "@fastify/rate-limit": "^8.0.3",
+        "firebase-admin": "^12.0.0",
+        "mongodb": "^6.3.0",
+        "dotenv": "^16.3.1",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "typescript": "^5.3.0",
+        "tsx": "^4.6.0",
+        "@typescript-eslint/eslint-plugin": "^6.13.0",
+        "@typescript-eslint/parser": "^6.13.0",
+        "eslint": "^8.54.0"
+    },
+    "keywords": [
+        "fastify",
+        "firebase",
+        "mongodb",
+        "api",
+        "backend"
+    ],
+    "author": "BetNad Team",
+    "license": "MIT"
+}
