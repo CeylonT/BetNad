@@ -38,3 +38,23 @@ export interface ErrorResponse {
   error: string;
   message: string;
 }
+
+export interface IPrivyWallet {
+  _id?: string;
+  userId: string;
+  privyWalletId: string;
+  address: string;
+  chainType: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WalletEntity {
+  id: string;
+  userId: string;
+  privyWalletId: string;
+  address: string;
+  chainType: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
