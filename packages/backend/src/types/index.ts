@@ -91,3 +91,54 @@ export interface TwitterOAuthRefreshResponse {
   expiresIn: number;
   message?: string;
 }
+
+// Poll types
+export interface Poll {
+  _id?: string;
+  description: string;
+  category: string;
+  verifierRule: string;
+  createdBy: string; // User ID
+  twitterPostId?: string;
+  status: 'active' | 'closed' | 'draft';
+  totalVotes: number;
+  yesVotes: number;
+  noVotes: number;
+  createdAt: Date;
+  updatedAt: Date;
+  expiresAt?: Date;
+}
+
+export interface CreatePollRequest {
+  description: string;
+  category?: string;
+  verifierRule: string;
+  expiresAt?: string; // ISO date string
+}
+
+export interface CreatePollResponse {
+  success: boolean;
+  poll?: Poll;
+  twitterPostId?: string;
+  message?: string;
+}
+
+export interface FetchPollsRequest {
+  category?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface FetchPollsResponse {
+  success: boolean;
+  polls: Poll[];
+  total: number;
+  message?: string;
+}
+
+export interface CategoryListResponse {
+  success: boolean;
+  categories: string[];
+  message?: string;
+}

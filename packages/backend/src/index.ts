@@ -6,10 +6,11 @@ import session from "@fastify/session";
 import Fastify from "fastify";
 import { config, logConfig } from "./config/env";
 import { authRoutes } from "./routes/auth";
-import { twitterOAuthRoutes } from "./routes/twitterOAuth";
 import { betFactoryRoutes } from "./routes/betFactory";
-import { privyClient } from "./services/privy";
+import { pollRoutes } from "./routes/polls";
+import { twitterOAuthRoutes } from "./routes/twitterOAuth";
 import { betFactoryService } from "./services/betFactory";
+import { privyClient } from "./services/privy";
 import { closeDatabaseConnection, connectToDatabase } from "./utils/mongodb";
 
 const fastify = Fastify({
@@ -69,6 +70,7 @@ async function registerRoutes() {
   await fastify.register(authRoutes, { prefix: "/api/auth" });
   await fastify.register(twitterOAuthRoutes, { prefix: "/api" });
   await fastify.register(betFactoryRoutes, { prefix: "/api/betting" });
+  await fastify.register(pollRoutes, { prefix: "/api" });
 }
 
 // Graceful shutdown

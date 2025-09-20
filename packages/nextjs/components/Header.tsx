@@ -21,7 +21,18 @@ export const menuLinks: HeaderMenuLink[] = [
     label: "Home",
     href: "/",
   },
-
+  {
+    label: "Polls",
+    href: "/polls",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 3v18h18" />
+        <path d="M18.7 8a3 3 0 0 0-5.4 0" />
+        <path d="M13.3 13a3 3 0 0 0-5.4 0" />
+        <path d="M7.9 18a3 3 0 0 0-5.4 0" />
+      </svg>
+    ),
+  },
   {
     label: "Debug Contracts",
     href: "/debug",

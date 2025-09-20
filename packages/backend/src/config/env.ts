@@ -41,6 +41,9 @@ const envSchema = z.object({
   // CORS settings
   CORS_ORIGIN: z.string().default("http://localhost:4000"),
 
+  // Frontend URL for poll links
+  FRONTEND_URL: z.string().default("http://localhost:3001"),
+
   // Privy configuration (optional)
   PRIVY_APP_ID: z.string().default(""),
   PRIVY_APP_SECRET: z.string().default(""),
@@ -177,6 +180,9 @@ export const config = {
   },
   cors: {
     origin: env.CORS_ORIGIN,
+  },
+  frontend: {
+    url: env.FRONTEND_URL,
   },
   twitter: {
     appKey: env.X_APP_KEY,
