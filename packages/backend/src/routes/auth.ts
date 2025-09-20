@@ -1,5 +1,4 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { z } from "zod";
 import { UserModel } from "../models/User";
 import { twitterService } from "../services/twitter";
 import {
@@ -10,16 +9,6 @@ import {
   VerifyTokenResponse,
 } from "../types";
 
-const loginSchema = z.object({
-  accessToken: z.string().min(1, "Access token is required"),
-  accessSecret: z.string().min(1, "Access secret is required"),
-});
-
-const verifyTokenSchema = z.object({
-  accessToken: z.string().min(1, "Access token is required"),
-  accessSecret: z.string().min(1, "Access secret is required"),
-});
-
 export async function authRoutes(fastify: FastifyInstance) {
   // Login endpoint
   fastify.post<{
@@ -29,7 +18,14 @@ export async function authRoutes(fastify: FastifyInstance) {
     "/login",
     {
       schema: {
-        body: loginSchema,
+        body: {
+          type: "object",
+          required: ["accessToken", "accessSecret"],
+          properties: {
+            accessToken: { type: "string" },
+            accessSecret: { type: "string" },
+          },
+        },
         response: {
           200: {
             type: "object",
@@ -117,7 +113,14 @@ export async function authRoutes(fastify: FastifyInstance) {
     "/verify-token",
     {
       schema: {
-        body: verifyTokenSchema,
+        body: {
+          type: "object",
+          required: ["accessToken", "accessSecret"],
+          properties: {
+            accessToken: { type: "string" },
+            accessSecret: { type: "string" },
+          },
+        },
         response: {
           200: {
             type: "object",

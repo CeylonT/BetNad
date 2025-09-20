@@ -1,11 +1,14 @@
+import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
+import session from "@fastify/session";
 import Fastify from "fastify";
 import { config, logConfig } from "./config/env";
 import { authRoutes } from "./routes/auth";
-import { closeDatabaseConnection, connectToDatabase } from "./utils/mongodb";
+import { twitterOAuthRoutes } from "./routes/twitterOAuth";
 import { privyClient } from "./services/privy";
+import { closeDatabaseConnection, connectToDatabase } from "./utils/mongodb";
 
 const fastify = Fastify({
   logger: {
@@ -31,6 +34,21 @@ async function registerPlugins() {
     max: 100,
     timeWindow: "1 minute",
   });
+
+  // Cookie support
+  await fastify.register(cookie, {
+    secret: config.session.secret,
+  });
+
+  // Session support
+  await fastify.register(session, {
+    secret: config.session.secret,
+    cookie: {
+      secure: config.isProduction,
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  });
 }
 
 // Register routes
@@ -47,6 +65,7 @@ async function registerRoutes() {
 
   // API routes
   await fastify.register(authRoutes, { prefix: "/api/auth" });
+  await fastify.register(twitterOAuthRoutes, { prefix: "/api" });
 }
 
 // Graceful shutdown

@@ -1,5 +1,5 @@
 import { TwitterApi } from "twitter-api-v2";
-import { config, validateSecrets } from "./env";
+import { config, validateSecrets } from "../config/env";
 import { logger } from "./logger";
 
 export class TwitterService {
@@ -130,7 +130,7 @@ export class TwitterService {
       }
 
       // Update sinceId to the most recent tweet
-      if (tweets.length > 0) {
+      if (tweets.length > 0 && tweets[0]) {
         this.sinceId = tweets[0].id;
       }
 
@@ -182,11 +182,15 @@ export class TwitterService {
     logger.info(`Starting mention polling every ${intervalMs}ms`);
 
     // Initial check
-    this.checkMentions().catch((error) => logger.error("Initial mention check failed:", error));
+    this.checkMentions().catch((error) =>
+      logger.error("Initial mention check failed:", error)
+    );
 
     // Set up interval
     this.mentionInterval = setInterval(() => {
-      this.checkMentions().catch((error) => logger.error("Mention check failed:", error));
+      this.checkMentions().catch((error) =>
+        logger.error("Mention check failed:", error)
+      );
     }, intervalMs);
   }
 
@@ -220,7 +224,10 @@ export class TwitterService {
    * @param accessSecret - User's access secret
    * @returns Promise with user data
    */
-  async verifyUserAuth(accessToken: string, accessSecret: string): Promise<any> {
+  async verifyUserAuth(
+    accessToken: string,
+    accessSecret: string
+  ): Promise<any> {
     try {
       const userClient = new TwitterApi({
         appKey: config.twitter.appKey,

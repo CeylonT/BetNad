@@ -6,18 +6,27 @@ dotenv.config();
 
 // Environment validation schema
 const envSchema = z.object({
-  // Twitter API credentials
+  // Twitter API credentials (v1.1 - for existing functionality)
   X_APP_KEY: z.string().min(1, "X_APP_KEY is required"),
   X_APP_SECRET: z.string().min(1, "X_APP_SECRET is required"),
   X_USER_ACCESS_TOKEN: z.string().min(1, "X_USER_ACCESS_TOKEN is required"),
   X_USER_ACCESS_SECRET: z.string().min(1, "X_USER_ACCESS_SECRET is required"),
   X_BOT_USER_ID: z.string().min(1, "X_BOT_USER_ID is required"),
 
+  // Twitter OAuth 2.0 credentials (for login with X)
+  X_CLIENT_ID: z.string().min(1, "X_CLIENT_ID is required"),
+  X_CLIENT_SECRET: z.string().min(1, "X_CLIENT_SECRET is required"),
+  X_CALLBACK_URL: z
+    .string()
+    .url("X_CALLBACK_URL must be a valid URL")
+    .default("http://localhost:3001/callback"),
+  SESSION_SECRET: z.string().min(1, "SESSION_SECRET is required"),
+
   // Server configuration
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
-  PORT: z.string().transform(Number).default("3001"),
+  PORT: z.string().transform(Number).default("4000"),
   HOST: z.string().default("0.0.0.0"),
   LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).default("info"),
 
@@ -30,7 +39,7 @@ const envSchema = z.object({
   MONGODB_DATABASE: z.string().default("betnad"),
 
   // CORS settings
-  CORS_ORIGIN: z.string().default("http://localhost:3000"),
+  CORS_ORIGIN: z.string().default("http://localhost:4000"),
 
   // Privy configuration (optional)
   PRIVY_APP_ID: z.string().default(""),
@@ -49,23 +58,27 @@ function validateEnv() {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const missingVars = error.errors
-        .filter((err) => err.code === "too_small" && err.minimum === 1)
-        .map((err) => err.path.join("."));
+        .filter((err: any) => err.code === "too_small" && err.minimum === 1)
+        .map((err: any) => err.path.join("."));
 
       const invalidVars = error.errors
-        .filter((err) => err.code !== "too_small")
-        .map((err) => `${err.path.join(".")}: ${err.message}`);
+        .filter((err: any) => err.code !== "too_small")
+        .map((err: any) => `${err.path.join(".")}: ${err.message}`);
 
       console.error("❌ Environment validation failed:");
 
       if (missingVars.length > 0) {
         console.error("Missing required variables:");
-        missingVars.forEach((varName) => console.error(`  - ${varName}`));
+        missingVars.forEach((varName: string) =>
+          console.error(`  - ${varName}`)
+        );
       }
 
       if (invalidVars.length > 0) {
         console.error("Invalid variables:");
-        invalidVars.forEach((varName) => console.error(`  - ${varName}`));
+        invalidVars.forEach((varName: string) =>
+          console.error(`  - ${varName}`)
+        );
       }
 
       console.error(
@@ -111,6 +124,9 @@ export class SecretManager {
     this.secrets.set("X_USER_ACCESS_TOKEN", env.X_USER_ACCESS_TOKEN);
     this.secrets.set("X_USER_ACCESS_SECRET", env.X_USER_ACCESS_SECRET);
     this.secrets.set("X_BOT_USER_ID", env.X_BOT_USER_ID);
+    this.secrets.set("X_CLIENT_ID", env.X_CLIENT_ID);
+    this.secrets.set("X_CLIENT_SECRET", env.X_CLIENT_SECRET);
+    this.secrets.set("SESSION_SECRET", env.SESSION_SECRET);
   }
 
   public getSecret(key: string): string | undefined {
@@ -170,6 +186,13 @@ export const config = {
     botUserId: env.X_BOT_USER_ID,
     mentionPollingInterval: env.MENTION_POLLING_INTERVAL,
     maxMentionResults: env.MAX_MENTION_RESULTS,
+    // OAuth 2.0 credentials
+    clientId: env.X_CLIENT_ID,
+    clientSecret: env.X_CLIENT_SECRET,
+    callbackUrl: env.X_CALLBACK_URL,
+  },
+  session: {
+    secret: env.SESSION_SECRET,
   },
   privy: {
     appId: env.PRIVY_APP_ID,
@@ -193,6 +216,9 @@ export function validateSecrets(): boolean {
     "X_USER_ACCESS_TOKEN",
     "X_USER_ACCESS_SECRET",
     "X_BOT_USER_ID",
+    "X_CLIENT_ID",
+    "X_CLIENT_SECRET",
+    "SESSION_SECRET",
   ];
 
   const missingSecrets = requiredSecrets.filter(

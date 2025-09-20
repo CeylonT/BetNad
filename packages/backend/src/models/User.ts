@@ -1,5 +1,5 @@
-import { getDatabase } from "../utils/mongodb";
 import { User } from "../types";
+import { getDatabase } from "../utils/mongodb";
 
 export class UserModel {
   private static collection = "users";
@@ -43,6 +43,12 @@ export class UserModel {
     const db = getDatabase();
     const collection = db.collection<User>(this.collection);
     return await collection.findOne({ email });
+  }
+
+  static async findByTwitterId(twitterId: string): Promise<User | null> {
+    const db = getDatabase();
+    const collection = db.collection<User>(this.collection);
+    return await collection.findOne({ twitterId });
   }
 
   static async updateWalletAddress(

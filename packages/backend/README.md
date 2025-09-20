@@ -70,7 +70,7 @@ Fastify-based backend API with Twitter authentication and MongoDB integration.
 | `HOST`                  | Server host               | `0.0.0.0`                                                      |
 | `NODE_ENV`              | Environment               | `development`                                                  |
 | `MONGODB_URI`           | MongoDB connection string | `mongodb://betnad_user:betnad_password@localhost:27017/betnad` |
-| `CORS_ORIGIN`           | CORS allowed origin       | `http://localhost:3000`                                        |
+| `CORS_ORIGIN`           | CORS allowed origin       | `http://localhost:4000`                                        |
 | `X_APP_KEY`             | Twitter API key           | Required                                                       |
 | `X_APP_SECRET`          | Twitter API secret        | Required                                                       |
 | `X_USER_ACCESS_TOKEN`   | Twitter access token      | Required                                                       |

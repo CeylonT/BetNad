@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { TwitterLogin } from "~~/components/TwitterLogin";
 import { Address } from "~~/components/scaffold-eth";
 
 const Home: NextPage = () => {
@@ -20,6 +21,10 @@ const Home: NextPage = () => {
           <div className="flex justify-center items-center space-x-2 flex-col">
             <p className="my-2 font-medium">Connected Address:</p>
             <Address address={connectedAddress} />
+          </div>
+
+          <div className="flex justify-center items-center mt-6">
+            <TwitterLogin />
           </div>
 
           <p className="text-center text-lg">
