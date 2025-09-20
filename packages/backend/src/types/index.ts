@@ -76,6 +76,7 @@ export interface TwitterOAuthLoginRequest {
 export interface TwitterOAuthLoginResponse {
   success: boolean;
   user: User;
+  accessToken: string;
   message?: string;
 }
 

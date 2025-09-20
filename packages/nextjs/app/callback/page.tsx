@@ -19,6 +19,7 @@ interface TwitterUser {
 interface TwitterLoginResponse {
   success: boolean;
   user?: TwitterUser;
+  accessToken?: string;
   message?: string;
   error?: string;
 }
@@ -60,9 +61,12 @@ export default function CallbackPage() {
 
         const data: TwitterLoginResponse = await response.json();
 
-        if (!data.success || !data.user) {
+        if (!data.success || !data.user || !data.accessToken) {
           throw new Error(data.message || "Twitter login failed");
         }
+
+        // Store access token in localStorage
+        localStorage.setItem("twitter_access_token", data.accessToken);
 
         setUser(data.user);
         setStatus("success");

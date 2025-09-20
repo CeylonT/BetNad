@@ -84,6 +84,7 @@ export async function twitterOAuthRoutes(fastify: FastifyInstance) {
                   updatedAt: { type: "string" },
                 },
               },
+              accessToken: { type: "string" },
               message: { type: "string" },
             },
           },
@@ -188,6 +189,7 @@ export async function twitterOAuthRoutes(fastify: FastifyInstance) {
         const response: TwitterOAuthLoginResponse = {
           success: true,
           user,
+          accessToken: tokens.accessToken,
           message: "Twitter OAuth login successful",
         };
 
@@ -328,6 +330,66 @@ export async function twitterOAuthRoutes(fastify: FastifyInstance) {
             error instanceof Error
               ? error.message
               : "Token verification failed",
+        };
+
+        return reply.code(401).send(errorResponse);
+      }
+    }
+  );
+
+  // Get Twitter profile using access token
+  fastify.get(
+    "/twitter/profile",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const authHeader = request.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          const errorResponse: ErrorResponse = {
+            success: false,
+            error: "MISSING_AUTH_HEADER",
+            message: "Authorization header with Bearer token is required",
+          };
+          return reply.code(401).send(errorResponse);
+        }
+
+        const accessToken = authHeader.substring(7);
+        const twitterUser = await twitterOAuthService.verifyAccessToken(
+          accessToken
+        );
+
+        // Find user by Twitter ID
+        const user = await UserModel.findByTwitterId(twitterUser.id);
+
+        if (!user) {
+          const errorResponse: ErrorResponse = {
+            success: false,
+            error: "USER_NOT_FOUND",
+            message: "User not found in database",
+          };
+          return reply.code(404).send(errorResponse);
+        }
+
+        return reply.code(200).send({
+          success: true,
+          user,
+          twitterProfile: {
+            id: twitterUser.id,
+            username: twitterUser.username,
+            name: twitterUser.name,
+            profile_image_url: twitterUser.profile_image_url
+          },
+          message: "Profile retrieved successfully",
+        });
+      } catch (error) {
+        console.error("Profile retrieval error:", error);
+
+        const errorResponse: ErrorResponse = {
+          success: false,
+          error: "PROFILE_RETRIEVAL_FAILED",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Profile retrieval failed",
         };
 
         return reply.code(401).send(errorResponse);

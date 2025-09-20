@@ -27,6 +27,22 @@ interface TwitterUser {
 interface TwitterLoginResponse {
   success: boolean;
   user?: TwitterUser;
+  accessToken?: string;
+  message?: string;
+  error?: string;
+}
+
+interface TwitterProfileData {
+  id: string;
+  username: string;
+  name: string;
+  profile_image_url?: string;
+}
+
+interface TwitterProfileResponse {
+  success: boolean;
+  user?: TwitterUser;
+  twitterProfile?: TwitterProfileData;
   message?: string;
   error?: string;
 }
@@ -35,7 +51,42 @@ export const TwitterLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<TwitterUser | null>(null);
+  const [twitterProfile, setTwitterProfile] = useState<TwitterProfileData | null>(null);
+  const [isCheckingToken, setIsCheckingToken] = useState(true);
   const router = useRouter();
+
+  const fetchUserProfile = async (accessToken: string) => {
+    try {
+      const response = await fetch("/api/twitter/profile", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data: TwitterProfileResponse = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || "Failed to fetch profile");
+      }
+
+      if (data.user) {
+        setUser(data.user);
+      }
+      if (data.twitterProfile) {
+        setTwitterProfile(data.twitterProfile);
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Profile fetch error:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch profile");
+      // Clear invalid token
+      localStorage.removeItem("twitter_access_token");
+      return false;
+    }
+  };
 
   const handleTwitterLogin = async () => {
     setIsLoading(true);
@@ -79,11 +130,16 @@ export const TwitterLogin = () => {
 
       const data: TwitterLoginResponse = await response.json();
 
-      if (!data.success || !data.user) {
+      if (!data.success || !data.user || !data.accessToken) {
         throw new Error(data.message || "Twitter login failed");
       }
 
-      setUser(data.user);
+      // Store access token in localStorage
+      localStorage.setItem("twitter_access_token", data.accessToken);
+
+      // Fetch fresh profile data
+      await fetchUserProfile(data.accessToken);
+
       console.log("Twitter login successful:", data.user);
 
       // You can redirect or update UI here
@@ -96,6 +152,21 @@ export const TwitterLogin = () => {
     }
   };
 
+  // Check for existing access token on component mount
+  React.useEffect(() => {
+    const checkExistingToken = async () => {
+      const accessToken = localStorage.getItem("twitter_access_token");
+
+      if (accessToken) {
+        await fetchUserProfile(accessToken);
+      }
+
+      setIsCheckingToken(false);
+    };
+
+    checkExistingToken();
+  }, []);
+
   // Check for OAuth callback parameters
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -107,27 +178,47 @@ export const TwitterLogin = () => {
     }
   }, []);
 
-  if (user) {
+  const handleLogout = () => {
+    localStorage.removeItem("twitter_access_token");
+    setUser(null);
+    setTwitterProfile(null);
+    setError(null);
+  };
+
+  if (isCheckingToken) {
+    return (
+      <div className="flex items-center space-x-2">
+        <span className="loading loading-spinner loading-sm"></span>
+        <span>Loading profile...</span>
+      </div>
+    );
+  }
+
+  if (user && twitterProfile) {
     return (
       <div className="flex flex-col items-center space-y-4 p-6 bg-base-100 rounded-lg shadow-lg">
         <div className="flex items-center space-x-3">
-          {user.photoURL && (
+          {twitterProfile.profile_image_url && (
             <img
-              src={user.photoURL}
-              alt={user.displayName || user.twitterUsername}
+              src={twitterProfile.profile_image_url}
+              alt={twitterProfile.name || twitterProfile.username}
               className="w-12 h-12 rounded-full"
             />
           )}
           <div>
-            <h3 className="text-lg font-semibold">Welcome, {user.displayName || user.twitterUsername}!</h3>
-            <p className="text-sm text-base-content/70">@{user.twitterUsername}</p>
+            <h3 className="text-lg font-semibold">
+              {twitterProfile.name || twitterProfile.username}
+            </h3>
+            <p className="text-sm text-base-content/70">@{twitterProfile.username}</p>
           </div>
         </div>
-        <div className="text-sm text-base-content/60">
+        <div className="text-sm text-base-content/60 space-y-1">
           <p>User ID: {user.uid}</p>
+          <p>Twitter ID: {twitterProfile.id}</p>
           {user.walletAddress && <p>Wallet: {user.walletAddress}</p>}
+          <p>Joined: {new Date(user.createdAt).toLocaleDateString()}</p>
         </div>
-        <button onClick={() => setUser(null)} className="btn btn-outline btn-sm">
+        <button onClick={handleLogout} className="btn btn-outline btn-sm">
           Logout
         </button>
       </div>
